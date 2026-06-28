@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class GejalahHipotesis extends Model
 {
     protected $table = 'gejala_hipotesis';
+
     protected $fillable = ['gejala_id', 'hipotesis_id', 'nilai_pakar'];
 
     public function gejala()
