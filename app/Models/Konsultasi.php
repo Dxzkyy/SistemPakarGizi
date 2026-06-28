@@ -9,8 +9,14 @@ class Konsultasi extends Model
     protected $table = 'konsultasi'; // ← tambah ini
 
     protected $fillable = [
-        'user_id', 'tipe', 'status',
-        'hipotesis_id', 'nilai_bayes', 'catatan_pakar',
+        'user_id',
+        'tipe',
+        'status',
+        'hipotesis_id',
+        'nilai_bayes',
+        'catatan_pakar',
+        'hipotesis_pakar_id',  // tambah ini
+        'nilai_bayes_pakar',   // tambah ini
     ];
 
     public function user()
@@ -26,6 +32,11 @@ class Konsultasi extends Model
     public function gejala()
     {
         return $this->belongsToMany(Gejala::class, 'konsultasi_gejala', 'konsultasi_id', 'gejala_id')
-                    ->withTimestamps();
+            ->withTimestamps();
+    }
+
+    public function hipotesisPakar()
+    {
+        return $this->belongsTo(Hipotesis::class, 'hipotesis_pakar_id');
     }
 }

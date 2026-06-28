@@ -21,7 +21,9 @@ class KonsultasiController extends Controller
 
     public function index(Request $request)
     {
-        $query = Konsultasi::with(['user', 'hipotesis'])->latest();
+        $query = Konsultasi::with(['user', 'hipotesis'])
+            ->where('tipe', 'self') // hanya self diagnostik
+            ->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -34,24 +36,14 @@ class KonsultasiController extends Controller
 
     public function show(string $id)
     {
-        $konsultasi = Konsultasi::with(['user', 'hipotesis', 'gejala'])
+        $konsultasi = Konsultasi::with(['user', 'hipotesis', 'hipotesisPakar', 'gejala'])
             ->findOrFail($id);
-
-        // Jika tipe self, cek apakah ada konsultasi pakar yang terhubung user ini
-        $konsultasiPakar = null;
-        if ($konsultasi->tipe === 'self') {
-            $konsultasiPakar = Konsultasi::where('user_id', $konsultasi->user_id)
-                ->where('tipe', 'pakar')
-                ->latest()
-                ->first();
-        }
 
         $semuaGejala = Gejala::orderBy('kode')->get();
         $semuaHipotesis = Hipotesis::all();
 
         return view('admin.konsultasi.show', compact(
             'konsultasi',
-            'konsultasiPakar',
             'semuaGejala',
             'semuaHipotesis'
         ));
@@ -60,8 +52,8 @@ class KonsultasiController extends Controller
     public function validasi(Request $request, string $id)
     {
         $request->validate([
-            'gejala'        => 'required|array|min:1',
-            'gejala.*'      => 'exists:gejala,id',
+            'gejala' => 'required|array|min:1',
+            'gejala.*' => 'exists:gejala,id',
             'catatan_pakar' => 'nullable|string',
         ], [
             'gejala.required' => 'Pilih minimal 1 gejala untuk validasi.',
@@ -79,26 +71,13 @@ class KonsultasiController extends Controller
 
         $hasilTertinggi = $hasil[0];
 
-        // Buat konsultasi baru tipe pakar
-        $konsultasiPakar = Konsultasi::create([
-            'user_id'       => $konsultasiSelf->user_id,
-            'tipe'          => 'pakar',
-            'status'        => 'selesai',
-            'hipotesis_id'  => $hasilTertinggi['hipotesis']->id,
-            'nilai_bayes'   => $hasilTertinggi['nilai_bayes'],
+        // UPDATE konsultasi self yang sudah ada (tidak buat baru)
+        $konsultasiSelf->update([
+            'status' => 'selesai',
+            'hipotesis_pakar_id' => $hasilTertinggi['hipotesis']->id,
+            'nilai_bayes_pakar' => $hasilTertinggi['nilai_bayes'],
             'catatan_pakar' => $request->catatan_pakar,
         ]);
-
-        // Simpan gejala pilihan pakar
-        foreach ($gejalaDipilih as $gejalaId) {
-            KonsultasiGejala::create([
-                'konsultasi_id' => $konsultasiPakar->id,
-                'gejala_id'     => $gejalaId,
-            ]);
-        }
-
-        // Update status self diagnostik menjadi selesai
-        $konsultasiSelf->update(['status' => 'selesai']);
 
         return redirect()->route('admin.konsultasi.index')
             ->with('success', 'Validasi konsultasi berhasil disimpan.');

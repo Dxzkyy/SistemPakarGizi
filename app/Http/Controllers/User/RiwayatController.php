@@ -9,8 +9,9 @@ class RiwayatController extends Controller
 {
     public function index()
     {
-        $konsultasi = Konsultasi::with('hipotesis')
+        $konsultasi = Konsultasi::with(['hipotesis', 'hipotesisPakar'])
             ->where('user_id', auth()->id())
+            ->where('tipe', 'self')
             ->latest()
             ->paginate(10);
 
@@ -19,19 +20,14 @@ class RiwayatController extends Controller
 
     public function show(string $id)
     {
-        $konsultasi = Konsultasi::with(['hipotesis', 'gejala'])
+        $konsultasi = Konsultasi::with(['hipotesis', 'hipotesisPakar', 'gejala'])
             ->where('user_id', auth()->id())
+            ->where('tipe', 'self')
             ->findOrFail($id);
 
-        // Cek apakah ada hasil validasi pakar untuk user ini (yang terkait)
         $validasiPakar = null;
-        if ($konsultasi->tipe === 'self') {
-            $validasiPakar = Konsultasi::with(['hipotesis', 'gejala'])
-                ->where('user_id', auth()->id())
-                ->where('tipe', 'pakar')
-                ->where('created_at', '>=', $konsultasi->created_at)
-                ->latest()
-                ->first();
+        if ($konsultasi->status === 'selesai' && $konsultasi->hipotesisPakar) {
+            $validasiPakar = $konsultasi;
         }
 
         return view('user.riwayat.show', compact('konsultasi', 'validasiPakar'));

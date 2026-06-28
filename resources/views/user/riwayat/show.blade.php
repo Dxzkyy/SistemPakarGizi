@@ -37,7 +37,6 @@
             </div>
 
             <div class="p-6">
-                {{-- Kondisi --}}
                 <div class="border border-gray-100 rounded-xl p-4 mb-5 border-l-4
                     {{ isset($konsultasi->hipotesis->kode) && $konsultasi->hipotesis->kode === 'K01' ? 'border-l-red-400' : (isset($konsultasi->hipotesis->kode) && $konsultasi->hipotesis->kode === 'K02' ? 'border-l-amber-400' : 'border-l-green-400') }}">
                     <p class="text-xs text-gray-500 font-medium mb-1">Kondisi Terdeteksi</p>
@@ -52,7 +51,6 @@
                     @endif
                 </div>
 
-                {{-- Gejala --}}
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Gejala yang Dirasakan</p>
                     <div class="space-y-1.5">
@@ -69,7 +67,6 @@
                     </div>
                 </div>
 
-                {{-- Rekomendasi --}}
                 @if($konsultasi->hipotesis?->rekomendasi)
                 <div class="mt-5 pt-5 border-t border-gray-100">
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Rekomendasi Gizi</p>
@@ -94,16 +91,16 @@
             <div class="p-6">
                 <div class="border border-green-100 rounded-xl p-4 mb-5 border-l-4 border-l-green-500">
                     <p class="text-xs text-gray-500 font-medium mb-1">Diagnosa Pakar</p>
-                    <p class="text-xl font-bold text-gray-900">{{ $validasiPakar->hipotesis->nama ?? '—' }}</p>
-                    @if($validasiPakar->nilai_bayes)
+                    <p class="text-xl font-bold text-gray-900">{{ $validasiPakar->hipotesisPakar->nama ?? '—' }}</p>
+                    @if($validasiPakar->nilai_bayes_pakar)
                     <div class="flex items-center gap-3 mt-3">
                         <div class="flex-1 h-1.5 bg-gray-100 rounded-full">
-                            <div class="h-1.5 bg-green-600 rounded-full" style="width: {{ min($validasiPakar->nilai_bayes, 100) }}%"></div>
+                            <div class="h-1.5 bg-green-600 rounded-full" style="width: {{ min($validasiPakar->nilai_bayes_pakar, 100) }}%"></div>
                         </div>
-                        <span class="text-xs font-bold text-green-600">{{ $validasiPakar->nilai_bayes }}%</span>
+                        <span class="text-xs font-bold text-green-600">{{ $validasiPakar->nilai_bayes_pakar }}%</span>
                     </div>
                     @endif
-                    <p class="text-xs text-gray-400 mt-2">{{ $validasiPakar->created_at->format('d M Y, H:i') }}</p>
+                    <p class="text-xs text-gray-400 mt-2">{{ $validasiPakar->updated_at->format('d M Y, H:i') }}</p>
                 </div>
 
                 @if($validasiPakar->catatan_pakar)
@@ -115,10 +112,10 @@
                 </div>
                 @endif
 
-                @if($validasiPakar->hipotesis?->rekomendasi)
+                @if($validasiPakar->hipotesisPakar?->rekomendasi)
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Rekomendasi Pakar</p>
-                    <p class="text-sm text-gray-600 leading-relaxed">{{ $validasiPakar->hipotesis->rekomendasi }}</p>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ $validasiPakar->hipotesisPakar->rekomendasi }}</p>
                 </div>
                 @endif
             </div>
